@@ -1,0 +1,56 @@
+version: "3.8"
+
+# The services of your app
+services:
+
+  # Database service: postgres:14
+  database:
+    # PostgreSQL image
+    image: postgres:14
+    # Restart the container if it crashes
+    restart: always
+    # Environment variables
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    # Mount the database-data volume
+    volumes:
+      - database-data:/var/lib/postgresql/data
+
+  # Server service: ./server
+  server:
+    # Build the image from the Dockerfile
+    build: ./server
+    # Restart the container if it crashes
+    restart: on-failure
+    # Environment variables
+    env_file:
+      - .server.env
+    environment:
+      DB_PASS: "${POSTGRES_PASSWORD}"
+    # Mount the server-data volume
+    volumes:
+      - server-data:/app/storage
+    # Expose port 3000 to the host
+    ports:
+      - 3000:8080
+    # Link the database service
+    depends_on:
+      - database
+
+  # Website service: ./website
+  website:
+    # Build the image from the Dockerfile
+    build: ./website
+    # Restart the container if it crashes
+    restart: on-failure
+    # Expose port 80 to the host
+    ports:
+      - 80:8080
+    # Link the server service
+    depends_on:
+      - server
+
+# Volumes store your app's data
+volumes:
+  database-data:
+  server-data:

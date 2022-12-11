@@ -1,0 +1,6 @@
+# Development
+.vscode
+
+# Environment
+.env
+.server.env
